@@ -2253,8 +2253,18 @@ function pdfFromDraft(draft, numero){
     doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.text("Dados bancários:",14,y); y+=5;
     doc.setFont("helvetica","normal"); doc.setFontSize(7.5);
     e.bancos.forEach(b=>{
-      doc.text(`${b.banco}: ${b.conta}${b.iban?` · IBAN ${b.iban}`:""}`,14,y,{maxWidth:pageW-28});
-      y+=5;
+      let currentX = 14;
+
+      doc.setFont("helvetica","bold");
+      let txtBanco = `${b.banco}: `
+      doc.text(txtBanco,currentX,y);
+
+      currentX += doc.getTextWidth(txtBanco);
+
+      doc.setFont("helvetica","normal");
+      doc.text(`Conta Nº: ${b.conta}${b.iban?` · IBAN: ${b.iban}`:""}`, currentX, y, {maxWidth: pageW - 28});
+
+      y += 5;
     });
     y+=4;
   }
