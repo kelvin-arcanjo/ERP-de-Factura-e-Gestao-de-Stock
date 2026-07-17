@@ -2121,11 +2121,18 @@ function buildPrintHTML(draft, numero){
        ${e.emailGeral?`${e.emailGeral} · `:""}${e.website||""}<br>
        Regime: ${configFiscal.regime}</p>`;
 
-  const bancosBlock = (!isPos && e.bancos.length) ? `
-    <div style="margin-top:14px;font-size:11px">
-      <strong>Dados bancários</strong><br>
-      ${e.bancos.map(b=>`${b.banco}: ${b.conta}${b.iban?` · IBAN ${b.iban}`:""}${b.swift?` · SWIFT ${b.swift}`:""}`).join("<br>")}
-    </div>` : "";
+const bancosBlock = (!isPos && e.bancos.length && draft.pagamento === "Transferência") ? `
+<div style="margin-top:18px; font-size:13px; line-height:1.5; color:#000;">
+  <strong style="font-size:14px; display:block; margin-bottom:6px; color:#111;">Dados Bancários:</strong>
+  ${e.bancos.map(b => `
+    <div style="margin-bottom:6px;">
+      <b style="color:#111;">${b.banco}</b>: 
+      <span style="color:#555;">Conta №:</span> ${b.conta} 
+      ${b.iban ? ` · <span style="color:#555;">IBAN:</span> ${b.iban}` : ""}
+      ${b.swift ? ` · <span style="color:#555;">SWIFT</span> ${b.swift}` : ""}
+    </div>
+  `).join("")}
+</div>` : "";
 
   return `
     <div class="inv-print-head">
