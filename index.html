@@ -1502,6 +1502,7 @@
 <div id="printInvoiceArea" class="inv-print"></div>
 
 <script>
+
 /* ================= DADOS DE EXEMPLO (em memória) ================= */
 const clientes = [
   {nome:"Empresa Kianda, Lda", nif:"5000123456", contacto:"923 456 789", limite:500000, divida:180000, estado:"Em dívida", tipo:"Empresa", retencao:false, endereco:"Rua Amílcar Cabral, Luanda", municipio:"Luanda", provincia:"Luanda", pais:"Angola", email:"geral@kianda.co.ao"},
@@ -1922,6 +1923,7 @@ function onClientSelectChange(){
 document.getElementById("clientSelect").addEventListener("change", onClientSelectChange);
 document.getElementById("isencaoDoc").addEventListener("change", renderInvoice);
 document.getElementById("docType").addEventListener("change", renderInvoice);
+
 
 function calcInvoiceTotals(){
   const globalDesc = +document.getElementById("descGlobal").value || 0;
@@ -2749,6 +2751,7 @@ document.getElementById("wizardNext").addEventListener("click", ()=>{
   toast("Configuração inicial concluída com sucesso");
 });
 
+
 /* ================= NAVEGAÇÃO ================= */
 const titles = {
   dashboard:["Dashboard","Visão geral do negócio em tempo real"],
@@ -2956,8 +2959,13 @@ document.querySelectorAll(".bot-chip").forEach(chip=>{
 });
 
 /* ================= CHARTS ================= */
-Chart.defaults.color = "#8595a8";
-Chart.defaults.font.family = "Inter";
+if(typeof Chart !== "undefined"){
+    Chart.defaults.color = "#8595a8";
+    Chart.defaults.font.family = "Inter";
+} else {
+    console.log('Chart is not defined')
+}
+
 function initCharts(){
   const ctx = document.getElementById("chartVendas");
   new Chart(ctx, {
