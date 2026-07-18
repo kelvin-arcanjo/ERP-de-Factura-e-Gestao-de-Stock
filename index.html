@@ -2249,25 +2249,83 @@ function pdfFromDraft(draft, numero){
   doc.setDrawColor(200); doc.line(14, 34, rightX, 34);
   doc.setFontSize(10); doc.text(`Cliente: ${draft.cliente}`, 14, 42);
 }
-  let y = isPos?46:52;
-  doc.setFont("helvetica","bold"); doc.setFontSize(isPos?7:9);
-  doc.text("Produto",14,y); doc.text("Qtd",Math.max(90,rightX-90),y); doc.text("P.Unit.",Math.max(105,rightX-75),y);
-  doc.text("IVA",Math.max(130,rightX-45),y); doc.text("Total",rightX-20,y);
-  doc.setFont("helvetica","normal");
-  doc.line(14,y+2,rightX,y+2);
-  y+=8;
+
+
+let y = isPos?55:52;
+  
+if(isPos){
+  //Ajuste de Margens...
+    const mX = 6
+    const pW = pageW - 6
+
   draft.itens.forEach(l=>{
     const base = l.qtd*l.preco*(1-l.desc/100);
     const ivaEf = draft.ivaZerado ? 0 : l.iva;
     const total = base*(1+ivaEf/100);
-    doc.text(String(l.nome).slice(0,30),14,y);
-    doc.text(String(l.qtd),Math.max(90,rightX-90),y);
-    doc.text(kz(l.preco),Math.max(105,rightX-75),y);
-    doc.text(ivaEf+"%",Math.max(130,rightX-45),y);
-    doc.text(kz(Math.round(total)),rightX-20,y);
-    y+=7;
-    if(y > doc.internal.pageSize.getHeight()-40){ doc.addPage(); y=20; }
+
+    // Linha 1: nome do produto...
+    doc.setFont("helvetica","bold")
+    doc.text(String(l.nome).slice(0, 35), mX, y)
+    y += 4.5;
+
+    // Linha 2: Quantidade...
+    doc.setFont("helvetica","normal")
+    doc.text(`Qtd: ${l.qtd}`, mX, y)
+    y += 4.5;
+
+    // Linha 3: Preço Unitário...
+    doc.setFont("helvetica","normal")
+    doc.text(`P.Unit.: ${kz(l.preco)}`, mX, y)
+    y += 4.5;
+
+    // Linha 4: IVA...
+    doc.text(`IVA: ${ivaEf}%`, mX, y)
+    y += 4.5;
+
+    // Linha 5: Total
+    doc.text(`Total: ${kz(Math.round(total))}`, mX, y)
+    y += 4.5;
+
+    //Linha divisória de Produtos...
+    doc.setDrawColor(220)
+    doc.line(mX, y, pW, y)
+    y += 4;
+  })
+} else {
+  // --- EXCLUSIVO A4: Desenha o Cabeçalho de Colunas Primeiro ---
+  doc.setFont("helvetica", "bold"); 
+  doc.setFontSize(9);
+  doc.text("Produto", 14, y); 
+  doc.text("Qtd", Math.max(90, rightX - 90), y); 
+  doc.text("P.Unit.", Math.max(105, rightX - 75), y);
+  doc.text("IVA", Math.max(130, rightX - 45), y); 
+  doc.text("Total", rightX - 20, y);
+  
+  doc.setFont("helvetica", "normal");
+  doc.line(14, y + 2, rightX, y + 2);
+  y += 8;
+
+  // --- EXCLUSIVO A4: O ciclo forEach recuperado para renderizar a tabela ---
+  draft.itens.forEach(l => {
+    const base = l.qtd * l.preco * (1 - l.desc / 100);
+    const ivaEf = draft.ivaZerado ? 0 : l.iva;
+    const total = base * (1 + ivaEf / 100);
+
+    doc.text(String(l.nome).slice(0, 30), 14, y);
+    doc.text(String(l.qtd), Math.max(90, rightX - 90), y);
+    doc.text(kz(l.preco), Math.max(105, rightX - 75), y);
+    doc.text(ivaEf + "%", Math.max(130, rightX - 45), y);
+    doc.text(kz(Math.round(total)), rightX - 20, y);
+    y += 7;
+
+    if (y > doc.internal.pageSize.getHeight() - 40) { 
+      doc.addPage(); 
+      y = 20; 
+    }
   });
+}
+
+
   y+=4; doc.line(rightX-76,y,rightX,y); y+=8;
   doc.text("Subtotal:",rightX-76,y); doc.text(kz(Math.round(draft.sub)),rightX-20,y); y+=7;
   doc.text("Desconto:",rightX-76,y); doc.text("- "+kz(Math.round(draft.descValor)),rightX-20,y); y+=7;
