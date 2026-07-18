@@ -2325,7 +2325,52 @@ if(isPos){
   });
 }
 
+// --- Totais ---
+if(isPos){
+  const mX = 6;
+  const centroX = pageW / 2;
+  const larguraDisponivel = pageW - 12; // Espaço útil entre as margens esquerda e direita
 
+  // 1. Preparar os textos rotulados com as propriedades corretas do teu projeto...
+  const txtSubtotal = `Subtotal: ${kz(Math.round(draft.sub))}`;
+  const txtDesconto = `Desconto: - ${kz(Math.round(draft.descValor || 0))}`;
+  const txtIVA = `IVA: ${kz(Math.round(draft.ivaFinal || 0))}`;
+  const txtTotal = `Total a pagar: ${kz(Math.round(draft.total))}`;
+
+  const linhasTotais = [
+    {texto: txtSubtotal, bold: false},
+    {texto: txtDesconto, bold: false},
+    {texto: txtIVA, bold: false},
+    {texto: "---DIVIDER---", bold: false},
+    {texto: txtTotal, bold: true}
+  ];
+
+  doc.setFontSize(9);
+
+  linhasTotais.forEach(item => {
+    if (item.texto === "---DIVIDER---") {
+      y += 2;
+      doc.setDrawColor(200);
+      doc.line(mX, y, pageW - mX, y);
+      y += 4;
+      return;
+    } 
+
+    doc.setFont("helvetica", item.bold ? "bold" : "normal");
+    // Sempre centralizado no POS...
+    doc.text(item.texto, centroX, y, {align: "center"});
+    y += 5;
+  });
+
+  y += 2;
+  
+  // --- Método de Pagamento no POS ---
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text(`Pagamento: ${draft.pagamento}`, centroX, y, {align: "center"});
+  y += 6;
+  
+} else {
   y+=4; doc.line(rightX-76,y,rightX,y); y+=8;
   doc.text("Subtotal:",rightX-76,y); doc.text(kz(Math.round(draft.sub)),rightX-20,y); y+=7;
   doc.text("Desconto:",rightX-76,y); doc.text("- "+kz(Math.round(draft.descValor)),rightX-20,y); y+=7;
@@ -2360,16 +2405,23 @@ if(isPos){
     });
     y+=4;
   }
-  if(isPos){
-    doc.setFont("helvetica","normal"); doc.setFontSize(8);
-    doc.text("Obrigado pela preferência",pageW/2,y,{align:"center"}); y+=6;
-  }
-  if(configFiscal.rodapeVisivel){
-    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(140);
-    doc.text(e.rodapeTexto,14,y,{maxWidth:pageW-28});
-  }
-  doc.save(`${numero.replace(/[^a-zA-Z0-9]/g,"_")}.pdf`);
 }
+
+// --- Fechamento do Documento (Fora do if/else de Totais) ---
+if(isPos){
+  doc.setFont("helvetica","normal"); doc.setFontSize(8);
+  doc.text("Obrigado pela preferência",pageW/2,y,{align:"center"}); y+=6;
+}
+if(configFiscal.rodapeVisivel){
+  doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(140);
+
+  // Garante margem adequada para o rodapé dependendo do formato...
+  doc.text(e.rodapeTexto, isPos ? 6 : 14, y, {maxWidth: pageW - (isPos ? 12 : 28)});
+}
+
+doc.save(`${numero.replace(/[^a-zA-Z0-9]/g,"_")}.pdf`);
+}
+
 function exportDraftPDF(){
   if(invoiceLines.length===0){ toast("Adicione itens à factura antes de exportar"); return; }
   const draft = currentDraft();
